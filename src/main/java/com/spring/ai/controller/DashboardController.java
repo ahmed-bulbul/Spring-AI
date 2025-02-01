@@ -20,10 +20,6 @@ public class DashboardController {
     @Autowired
     private DataService dataService;
 
-    @GetMapping("/test2")
-    public String test() {
-        return "test";
-    }
 
     @GetMapping("/")
     public String dashboard(Model model) {
