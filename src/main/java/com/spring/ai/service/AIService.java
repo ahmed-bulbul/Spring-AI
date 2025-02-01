@@ -68,13 +68,13 @@ public class AIService {
         - **Simulate the results** based on the schema.
         - **Do not return user passwords** or sensitive data.
         - **Format the output strictly as JSON**:
+        - ** Output should be actual result of the query.**
 
         ```json
         {
             "sql": "Generated SQL query here",
             "result": [
-                { "id": "valueOfId", "email": "a@gmail.com" },
-                { "id": "valueOfId", "email": "b@gmail.com" }
+                { "column1": "value1", ....continue show until column found ... }
             ]
         }
         ```
