@@ -44,28 +44,46 @@ public class AIService {
         }
     }
 
+
     public Flux<String> analyzeQueryStream(String userQuery) {
-        String schemaContext = schemaService.getSchemaContext();
+        String schemaContext = schemaService.getSchemaContext(); // Cached Schema
 
+        // Updated prompt to include simulated results as well
         String prompt = """
-            Database Schema:
-            %s
-            
-            User Query: "%s"
-            
-            Respond with JSON:
-            {
-                "operation": "COUNT|SUM|AVG",
-                "entity": "users|roles",
-                "timeFrame": {
-                    "period": "DAY|WEEK|MONTH",
-                    "value": number
-                },
-                "chartType": "pie|bar|line"
-            }
-            """.formatted(schemaContext, userQuery);
+        You are an expert SQL assistant. Convert the user's natural language query into a **valid PostgreSQL SQL query** based on the provided schema.
+        Also, simulate the result of the query based on the schema data.
 
+        ## **Database Schema**:
+        %s
+
+        ## **User Query**:
+        "%s"
+
+        ## **Guidelines**:
+        - Use **ONLY** tables and columns from the schema.
+        - Ensure the query is **valid PostgreSQL** syntax.
+        - **Never make up** table or column names.
+        - If the query requires **JOINs**, ensure the correct relationships.
+        - If a column stores **timestamps**, use `created_at` or relevant columns for date filtering.
+        - **Simulate the results** based on the schema.
+        - **Do not return user passwords** or sensitive data.
+        - **Format the output strictly as JSON**:
+
+        ```json
+        {
+            "sql": "Generated SQL query here",
+            "result": [
+                { "id": "valueOfId", "email": "a@gmail.com" },
+                { "id": "valueOfId", "email": "b@gmail.com" }
+            ]
+        }
+        ```
+
+    """.formatted(schemaContext, userQuery);
+
+        // Call the model to generate the SQL query and simulated result
         return client.prompt().user(prompt).stream().content();
     }
+
 
 }
