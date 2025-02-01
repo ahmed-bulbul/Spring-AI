@@ -1,0 +1,69 @@
+package com.spring.ai.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.ai.model.QueryAnalysis;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+
+
+@Service
+public class AIService {
+
+
+    private final ChatClient client;
+
+    private final SchemaService schemaService;
+
+    @Autowired
+    private ObjectMapper objectMapper; // For JSON parsing
+
+    public AIService(ChatClient.Builder client, SchemaService schemaService, ObjectMapper objectMapper) {
+        this.client = client.build();
+        this.schemaService = schemaService;
+        this.objectMapper = objectMapper;
+    }
+
+
+    private QueryAnalysis parseResponse(String response) {
+        try {
+            // Extract JSON part from the response
+            int jsonStart = response.indexOf("{");
+            int jsonEnd = response.lastIndexOf("}");
+
+            if (jsonStart != -1 && jsonEnd != -1) {
+                String jsonString = response.substring(jsonStart, jsonEnd + 1);
+                return objectMapper.readValue(jsonString, QueryAnalysis.class);
+            } else {
+                throw new RuntimeException("No valid JSON found in response: " + response);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse response from Ollama: " + response, e);
+        }
+    }
+
+    public Flux<String> analyzeQueryStream(String userQuery) {
+        String schemaContext = schemaService.getSchemaContext();
+
+        String prompt = """
+            Database Schema:
+            %s
+            
+            User Query: "%s"
+            
+            Respond with JSON:
+            {
+                "operation": "COUNT|SUM|AVG",
+                "entity": "users|roles",
+                "count": 0,
+                "timeFrame": "DAY|WEEK|MONTH|YEAR",
+                "chartType": "pie|bar|line"
+            }
+            """.formatted(schemaContext, userQuery);
+
+        return client.prompt().user(prompt).stream().content();
+    }
+
+}

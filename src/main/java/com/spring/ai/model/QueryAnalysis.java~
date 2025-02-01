@@ -1,0 +1,15 @@
+package com.spring.ai.model;
+
+
+import lombok.Data;
+
+
+public class QueryAnalysis {
+    private String operation; // e.g., COUNT, SUM, AVG
+    private String entity;    // e.g., users, roles
+    private TimeFrame timeFrame;
+    private String chartType; // e.g., pie, bar, line
+    
+
+
+}
