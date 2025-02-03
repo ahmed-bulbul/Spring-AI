@@ -1,8 +1,6 @@
 package com.spring.ai.controller;
 
 import org.springframework.ui.Model;
-import com.spring.ai.model.ChartData;
-import com.spring.ai.model.QueryAnalysis;
 import com.spring.ai.model.QueryRequest;
 import com.spring.ai.service.AIService;
 import com.spring.ai.service.DataService;
@@ -32,4 +30,5 @@ public class DashboardController {
     public Flux<String> handleQuery(@RequestParam String query) {
         return aiService.analyzeQueryStream(query);
     }
+
 }

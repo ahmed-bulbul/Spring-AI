@@ -1,9 +1,7 @@
 package com.spring.ai.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spring.ai.model.QueryAnalysis;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -25,25 +23,6 @@ public class AIService {
         this.schemaService = schemaService;
         this.objectMapper = objectMapper;
     }
-
-
-    private QueryAnalysis parseResponse(String response) {
-        try {
-            // Extract JSON part from the response
-            int jsonStart = response.indexOf("{");
-            int jsonEnd = response.lastIndexOf("}");
-
-            if (jsonStart != -1 && jsonEnd != -1) {
-                String jsonString = response.substring(jsonStart, jsonEnd + 1);
-                return objectMapper.readValue(jsonString, QueryAnalysis.class);
-            } else {
-                throw new RuntimeException("No valid JSON found in response: " + response);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse response from Ollama: " + response, e);
-        }
-    }
-
 
     public Flux<String> analyzeQueryStream(String userQuery) {
         String schemaContext = schemaService.getSchemaContext(); // Cached Schema
